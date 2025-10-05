@@ -4,39 +4,39 @@ const orderModel = {
   // Crear una nueva orden
   async create(orderData) {
     const { userId, items, totalPrice } = orderData;
-    
-    // Iniciar transacción
-    const client = await db.query('BEGIN');
-    
+
+    const client = await db.pool.connect(); // ✅ obtener cliente del pool
+
     try {
+      await client.query('BEGIN'); // ✅ iniciar transacción correctamente
+
       // Crear la orden
       const orderQuery = `
         INSERT INTO orders (user_id, total_price, status)
         VALUES ($1, $2, 'PENDING')
         RETURNING id, user_id, total_price, status, created_at, updated_at
       `;
-      
       const orderResult = await client.query(orderQuery, [userId, totalPrice]);
       const order = orderResult.rows[0];
-      
+
       // Insertar los ítems de la orden
       for (const item of items) {
         const orderItemQuery = `
           INSERT INTO order_items (order_id, menu_id, quantity)
           VALUES ($1, $2, $3)
         `;
-        
         await client.query(orderItemQuery, [order.id, item.menuId, item.quantity]);
       }
-      
-      // Confirmar transacción
-      await client.query('COMMIT');
-      
+
+      await client.query('COMMIT'); // ✅ confirmar transacción
       return { orderId: order.id };
+
     } catch (error) {
-      // Revertir transacción en caso de error
-      await client.query('ROLLBACK');
+      await client.query('ROLLBACK'); // ✅ revertir si algo falla
       throw error;
+
+    } finally {
+      client.release(); // ✅ liberar conexión siempre
     }
   },
   
