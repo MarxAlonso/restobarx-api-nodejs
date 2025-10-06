@@ -38,3 +38,4 @@ app.use(errorHandler);
 app.listen(PORT, () => {
   console.log(`Servidor corriendo en http://localhost:${PORT}`);
 });
+//Comentario: Todo esto es el api, el backend con nodejs y express :D
