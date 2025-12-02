@@ -1,6 +1,8 @@
 const express = require('express');
 const cors = require('cors');
 const dotenv = require('dotenv');
+const http = require('http');
+const { Server } = require('socket.io');
 const { errorHandler } = require('./middleware/errorHandler');
 
 // Cargar variables de entorno
@@ -15,6 +17,36 @@ const paymentRoutes = require('./routes/paymentRoutes');
 
 const app = express();
 const PORT = process.env.PORT || 8089;
+
+// Crear servidor HTTP
+const server = http.createServer(app);
+
+// Configurar Socket.IO
+const io = new Server(server, {
+  cors: {
+    origin: process.env.FRONTEND_URL || "http://localhost:5173",
+    methods: ["GET", "POST"],
+    credentials: true
+  }
+});
+
+// Exportar io para usar en otros módulos
+global.io = io;
+
+// Socket.IO - Manejo de conexiones
+io.on('connection', (socket) => {
+  console.log('✅ Cliente conectado:', socket.id);
+
+  // Unir al room de administradores si es admin
+  socket.on('join-admin', () => {
+    socket.join('admins');
+    console.log('👨‍💼 Admin conectado:', socket.id);
+  });
+
+  socket.on('disconnect', () => {
+    console.log('❌ Cliente desconectado:', socket.id);
+  });
+});
 
 // Middleware
 app.use(cors());
@@ -37,7 +69,8 @@ app.get('/api/health', (req, res) => {
 app.use(errorHandler);
 
 // Iniciar servidor
-app.listen(PORT, () => {
-  console.log(`Servidor corriendo en http://localhost:${PORT}`);
+server.listen(PORT, () => {
+  console.log(`🚀 Servidor corriendo en http://localhost:${PORT}`);
+  console.log(`🔌 Socket.IO listo para conexiones`);
 });
 //Comentario: Todo esto es el api, el backend con nodejs y express :D
