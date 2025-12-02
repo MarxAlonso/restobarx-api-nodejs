@@ -16,6 +16,7 @@
     "jsonwebtoken": "^9.0.2",
     "mercadopago": "^2.11.0",
     "pg": "^8.16.3",
-    "postgres": "^3.4.7"
+    "postgres": "^3.4.7",
+    "socket.io": "^4.8.1"
   }
 }
