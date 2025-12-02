@@ -19,7 +19,7 @@ dotenv.config();
  * @property {boolean} ssl.rejectUnauthorized - Permite conexiones seguras en entornos con certificados autofirmados.
  */
 const pool = new Pool({
-  connectionString: process.env.DATABASE_PRUEBA,
+  connectionString: process.env.DATABASE_URL,
   ssl: { rejectUnauthorized: false }
 });
 
