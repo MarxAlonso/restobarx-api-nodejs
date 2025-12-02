@@ -124,6 +124,38 @@ const orderController = {
         message: 'Error interno del servidor'
       });
     }
+  },
+
+  // Obtener órdenes recientes para notificaciones (polling)
+  async getRecentOrders(req, res) {
+    try {
+      const minutes = parseInt(req.query.minutes) || 5;
+      const orders = await orderModel.getRecentOrders(minutes);
+
+      // Formatear como notificaciones
+      const notifications = orders.map(order => ({
+        id: `order-${order.id}-${new Date(order.created_at).getTime()}`,
+        type: 'NEW_ORDER',
+        orderId: order.id,
+        userName: order.user_name || 'Cliente',
+        userEmail: order.user_email || '',
+        totalPrice: parseFloat(order.total_price),
+        itemCount: order.items?.length || 0,
+        timestamp: order.created_at,
+        read: false
+      }));
+
+      res.status(200).json({
+        success: true,
+        data: notifications
+      });
+    } catch (error) {
+      console.error('Error al obtener órdenes recientes:', error);
+      res.status(500).json({
+        success: false,
+        message: 'Error interno del servidor'
+      });
+    }
   }
 };
 

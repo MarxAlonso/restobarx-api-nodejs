@@ -10,6 +10,7 @@ router.get('/user', auth, orderController.getUserOrders);
 
 // Rutas protegidas (solo admin)
 router.get('/', auth, isAdmin, orderController.getAllOrders);
+router.get('/recent', auth, isAdmin, orderController.getRecentOrders);
 router.put('/:orderId/status', auth, isAdmin, orderController.updateOrderStatus);
 
 module.exports = router;
